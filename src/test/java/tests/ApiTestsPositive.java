@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static helpers.AllureListener.withCustomTemplates;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
@@ -29,9 +30,14 @@ public class ApiTestsPositive {
     @DisplayName("Check all users page test")
     public void getAllUsers() {
         given()
+                .filter(withCustomTemplates())
+                .log().uri()
+                .log().body()
                 .param("page", 1)
                 .get(EndPoints.URL + EndPoints.USERS)
                 .then()
+                .log().status()
+                .log().body()
                 .statusCode(200)
                 .body("data", hasSize(6));
     }
@@ -43,10 +49,16 @@ public class ApiTestsPositive {
         String parseDate = DateFormat.formatDateToString(date, "yyyy-MM-dd'T'HH:mm", "Europe/London");
 
         Response response = given()
+                .filter(withCustomTemplates())
+                .log().uri()
+                .log().body()
                 .contentType(ContentType.JSON)
                 .body(userBody)
                 .post(EndPoints.URL + EndPoints.USERS);
-        response.then().statusCode(201);
+        response.then()
+                .log().status()
+                .log().body()
+                .statusCode(201);
         response.then().assertThat().body("createdAt", containsString(parseDate));
     }
 
@@ -54,10 +66,15 @@ public class ApiTestsPositive {
     @DisplayName("Register user test")
     public void registerUser() {
         given()
+                .filter(withCustomTemplates())
+                .log().uri()
+                .log().body()
                 .contentType(ContentType.JSON)
                 .body(userBody)
                 .post(EndPoints.URL + EndPoints.REGISTER)
                 .then()
+                .log().status()
+                .log().body()
                 .statusCode(200)
                 .body("token", is(notNullValue()));
     }
